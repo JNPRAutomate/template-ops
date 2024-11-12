@@ -1,0 +1,36 @@
+global result
+global result_adv
+global header
+
+header = "{:^16} | {:^16} | {:^16} | {:^16}".format(
+    "Total sessions", "TCP sessions", "UDP sessions", "ICMP sessions"
+)
+
+ip="{{ ip }}"
+
+rpc_output = dev.rpc.get_flow_session_information(
+    normalize=True, source_prefix=ip, summary=True
+)
+total = rpc_output.findtext(".//displayed-session-count")
+
+if int(total) > 0:
+
+{% for proto in ['tcp', 'udp', 'icmp', 'icmp6'] %}
+    rpc_output = dev.rpc.get_flow_session_information(
+        normalize=True, source_prefix=ip, summary=True, protocol="{{ proto }}"
+    )
+    {{ proto }} = rpc_output.findtext(".//displayed-session-count")
+{% endfor %}
+
+    icmp = int(icmp) + int(icmp6)
+
+    result = "{:>16} | {:>16} | {:>16} | {:>16}".format(total, tcp, udp, icmp)
+    result_adv = [ total, tcp, udp, icmp ] 
+
+
+elif ip == "0/0":
+    result = "{:>16} | {:>16} | {:>16} | {:>16}".format(0, 0, 0, 0)
+    result_adv = [ 0, 0, 0, 0 ]
+
+else:
+    result = ""

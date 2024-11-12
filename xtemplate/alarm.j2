@@ -1,0 +1,5 @@
+global result
+
+rpc_output = dev.rpc.get_system_alarm_information({"format":"text"})
+
+result = rpc_output.text

@@ -1,0 +1,7 @@
+global result
+
+rpc_output = dev.rpc.get_software_information({"format": "text"})
+
+result = " ".join(
+    [line for line in rpc_output.text.splitlines() if "Junos" in line or "ike" in line]
+)

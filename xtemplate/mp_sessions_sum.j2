@@ -1,0 +1,26 @@
+global result
+global header
+
+
+def sum_data(column):
+    summary = 0
+    for data in template_thread_data:
+        try:
+            summary += int(data[2][column])
+        except:
+            pass
+    return summary
+
+
+table_width = 92
+
+
+print(
+    "| {:^12} | {:>16} | {:>16} | {:>16} | {:>16} |".format(
+        "Summary", sum_data(0), sum_data(1), sum_data(2), sum_data(3)
+    )
+)
+print("-" * table_width)
+
+result = None
+header = None

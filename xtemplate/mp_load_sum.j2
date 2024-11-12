@@ -1,0 +1,103 @@
+global result
+global header
+
+(
+    sum_ip4_sess,
+    sum_ip6_sess,
+    sum_ip4_cps,
+    sum_ip6_cps,
+    sum_out_pps,
+    sum_pfe_load,
+    sum_sum_in_gbps,
+    sum_sum_out_gbps,
+    sum_sum_in_mpps,
+    sum_sum_out_mpps,
+    sum_sum_nat_sess,
+) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+for data in template_thread_data:
+    if len(data) > 2:
+        kpi = data[2][0]
+        sum_pfe_load += int(kpi[0])
+        sum_ip4_sess += int(kpi[1])
+        sum_ip6_sess += int(kpi[2])
+        sum_sum_nat_sess += int(kpi[3])
+        sum_ip4_cps += int(kpi[4])
+        sum_ip6_cps += int(kpi[5])
+        sum_sum_in_gbps += float(kpi[6])
+        sum_sum_out_gbps += float(kpi[7])
+        sum_sum_in_mpps += float(kpi[8])
+        sum_sum_out_mpps += float(kpi[9])
+
+load_data_sum = [
+    [
+        "summary",
+        "N/A",
+        sum_ip4_sess,
+        sum_ip6_sess,
+        sum_sum_nat_sess,
+        sum_ip4_cps,
+        sum_ip6_cps,
+        sum_sum_in_gbps,
+        sum_sum_out_gbps,
+        sum_sum_in_mpps,
+        sum_sum_out_mpps,
+        "N/A",
+    ]
+]
+
+nna_data_count = 0
+for data in template_thread_data:
+    if len(data) > 2:
+        kpi = data[2][0]
+        if kpi[1] != "N/A":
+            nna_data_count += 1
+
+if nna_data_count > 1:
+    avg_pfe_load = round(sum_pfe_load / nna_data_count)
+    avg_ip4_sess = round(sum_ip4_sess / nna_data_count)
+    avg_ip6_sess = round(sum_ip6_sess / nna_data_count)
+    avg_sum_nat_sess = round(sum_sum_nat_sess / nna_data_count)
+    avg_ip4_cps = round(sum_ip4_cps / nna_data_count)
+    avg_ip6_cps = round(sum_ip6_cps / nna_data_count)
+    avg_out_pps = round(sum_out_pps / nna_data_count)
+    avg_sum_in_gbps = round(sum_sum_in_gbps / nna_data_count, 2)
+    avg_sum_out_gbps = round(sum_sum_out_gbps / nna_data_count, 2)
+    avg_sum_in_mpps = round(sum_sum_in_mpps / nna_data_count, 2)
+    avg_sum_out_mpps = round(sum_sum_out_mpps / nna_data_count, 2)
+
+    load_data_avg = [
+        [
+            "average",
+            avg_pfe_load,
+            avg_ip4_sess,
+            avg_ip6_sess,
+            avg_sum_nat_sess,
+            avg_ip4_cps,
+            avg_ip6_cps,
+            avg_sum_in_gbps,
+            avg_sum_out_gbps,
+            avg_sum_in_mpps,
+            avg_sum_out_mpps,
+        ]
+    ]
+
+    for data in load_data_avg:
+        print(
+            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} |".format(
+                *data
+            )
+        )
+
+    for data in load_data_sum:
+        print(
+            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} |".format(
+                *data
+            )
+        )
+
+    print("-" * 144)
+
+
+header = None
+result = None

@@ -1,0 +1,21 @@
+
+delete groups dd-secgw-tlb-c-0{{ seq }}
+
+set groups dd-secgw-tlb-c-0{{ seq }} services traffic-load-balance instance secgw-01 group vsrx-group-01 real-services c-0{{ seq }}
+set groups dd-secgw-tlb-c-0{{ seq }} services traffic-load-balance instance secgw-01 real-service c-0{{ seq }} address 100.66.{{ seq_m1 }}.1
+
+set groups dd-secgw-tlb-c-0{{ seq }} interfaces ae0 unit {{ ran_vlan }} vlan-id {{ ran_vlan }}
+set groups dd-secgw-tlb-c-0{{ seq }} interfaces ae0 unit {{ ran_vlan }} family inet address 100.65.{{ seq_m1 }}.1/24
+set groups dd-secgw-tlb-c-0{{ seq }} interfaces ae0 unit {{ core_vlan }} vlan-id {{ core_vlan }}
+set groups dd-secgw-tlb-c-0{{ seq }} interfaces ae0 unit {{ core_vlan }} family inet address 100.64.{{ seq_m1 }}.1/24
+
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-ran protocols bgp group ran-vsrx neighbor 100.65.{{ seq_m1 }}.10 peer-as {{ aut_sys }}
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-ran protocols bgp group ran-vsrx neighbor 100.65.{{ seq_m1 }}.11 peer-as {{ other_aut_sys }}
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-ran interface ae0.{{ ran_vlan }}
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-core protocols bgp group core-vsrx neighbor 100.64.{{ seq_m1 }}.10 peer-as {{ aut_sys }}
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-core protocols bgp group core-vsrx neighbor 100.64.{{ seq_m1 }}.11 peer-as {{ other_aut_sys }}
+set groups dd-secgw-tlb-c-0{{ seq }} routing-instances vr-core interface ae0.{{ core_vlan }}
+
+set apply-groups dd-secgw-tlb-c-0{{ seq }}
+set apply-groups dd-secgw-tlb-common
+

@@ -1,0 +1,91 @@
+delete groups scale-out-srx
+delete groups auto-fbf
+
+set groups auto-fbf
+set groups auto-fbf security nat source pool pool-1 address 2.{{ seq }}.0.0/29
+set groups auto-fbf routing-instances vr-cgn routing-options static route 2.{{ seq }}.0.0/29 discard
+
+set groups scale-out-srx system configuration-database ephemeral instance pl
+set groups scale-out-srx system configuration-database ephemeral purge-on-version 5
+
+set groups scale-out-srx security log mode stream
+set groups scale-out-srx security log stream pod-host host 10.1.255.254
+set groups scale-out-srx security log stream pod-host host routing-instance vr-cgn
+set groups scale-out-srx security log stream pod-host source-address 100.65.{{ seq }}.10
+set groups scale-out-srx security log profile profile-1 stream-name pod-host
+set groups scale-out-srx security log profile profile-1 category session field-name source-address
+set groups scale-out-srx security log profile profile-1 category session field-name source-port
+set groups scale-out-srx security log profile profile-1 category session field-name destination-address
+set groups scale-out-srx security log profile profile-1 category session field-name destination-port
+set groups scale-out-srx security log profile profile-1 category session field-name protocol-id
+set groups scale-out-srx security log profile profile-1 category session field-name nat-source-address
+set groups scale-out-srx security log profile profile-1 category session field-name nat-source-port
+set groups scale-out-srx security log profile profile-1 category session field-name reason
+set groups scale-out-srx security log profile profile-1 category session field-name elapsed-time
+set groups scale-out-srx security log profile profile-1 default-profile activate
+set groups scale-out-srx security alg h323 disable
+set groups scale-out-srx security alg mgcp disable
+set groups scale-out-srx security alg msrpc disable
+set groups scale-out-srx security alg sunrpc disable
+set groups scale-out-srx security alg sccp disable
+{# set groups scale-out-srx security alg rtsp disable #}
+set groups scale-out-srx security alg talk disable
+set groups scale-out-srx security alg tftp disable
+set groups scale-out-srx security nat source pool pool-1 routing-instance vr-cgn
+set groups scale-out-srx security nat source pool pool-1 port block-allocation block-size 128
+set groups scale-out-srx security nat source pool pool-1 port block-allocation maximum-blocks-per-host 4
+set groups scale-out-srx security nat source pool pool-1 port block-allocation last-block-recycle-timeout 600
+set groups scale-out-srx security nat source pool pool-1 address-pooling paired
+set groups scale-out-srx security nat source rule-set source from zone trust
+set groups scale-out-srx security nat source rule-set source to zone untrust
+set groups scale-out-srx security nat source rule-set source rule source-1 match source-address 0.0.0.0/0
+set groups scale-out-srx security nat source rule-set source rule source-1 match destination-address 0.0.0.0/0
+set groups scale-out-srx security nat source rule-set source rule source-1 then source-nat pool pool-1
+set groups scale-out-srx security policies from-zone trust to-zone untrust policy permit match source-address any
+set groups scale-out-srx security policies from-zone trust to-zone untrust policy permit match destination-address any
+set groups scale-out-srx security policies from-zone trust to-zone untrust policy permit match application any
+set groups scale-out-srx security policies from-zone trust to-zone untrust policy permit then permit
+set groups scale-out-srx security policies from-zone trust to-zone untrust policy permit then log session-close
+deactivate groups scale-out-srx security policies from-zone trust to-zone untrust policy permit then log 
+set groups scale-out-srx security policies global policy final-touch match source-address any
+set groups scale-out-srx security policies global policy final-touch match destination-address any
+set groups scale-out-srx security policies global policy final-touch match application any
+set groups scale-out-srx security policies global policy final-touch then deny
+set groups scale-out-srx security zones security-zone untrust host-inbound-traffic system-services ping
+set groups scale-out-srx security zones security-zone untrust host-inbound-traffic protocols bgp
+set groups scale-out-srx security zones security-zone untrust host-inbound-traffic protocols bfd
+set groups scale-out-srx security zones security-zone untrust interfaces ge-0/0/1.0
+set groups scale-out-srx security zones security-zone untrust screen untrust 
+set groups scale-out-srx security zones security-zone trust tcp-rst
+set groups scale-out-srx security zones security-zone trust host-inbound-traffic system-services ping
+set groups scale-out-srx security zones security-zone trust host-inbound-traffic protocols bgp
+set groups scale-out-srx security zones security-zone trust host-inbound-traffic protocols bfd
+set groups scale-out-srx security zones security-zone trust interfaces ge-0/0/0.0
+set groups scale-out-srx security flow tcp-session strict-syn-check
+set groups scale-out-srx security screen ids-option untrust icmp flood threshold 10000
+set groups scale-out-srx security screen ids-option untrust tcp syn-flood destination-threshold 10000
+set groups scale-out-srx security screen ids-option untrust udp flood threshold 10000
+set groups scale-out-srx interfaces ge-0/0/0 unit 0 family inet address 100.65.{{ seq }}.10/24
+set groups scale-out-srx interfaces ge-0/0/1 unit 0 family inet address 100.64.{{ seq }}.10/24
+set groups scale-out-srx policy-options policy-statement export-bgp-trust term t10 from route-filter 0.0.0.0/0 exact
+set groups scale-out-srx policy-options policy-statement export-bgp-trust term t10 then accept
+set groups scale-out-srx policy-options policy-statement export-bgp-trust term t100 then reject
+set groups scale-out-srx policy-options policy-statement export-bgp-untrust term t10 from route-filter 2.0.0.0/8 orlonger
+set groups scale-out-srx policy-options policy-statement export-bgp-untrust term t10 then accept
+set groups scale-out-srx policy-options policy-statement export-bgp-untrust term t100 then reject
+set groups scale-out-srx routing-instances vr-cgn instance-type virtual-router
+set groups scale-out-srx routing-instances vr-cgn routing-options autonomous-system {{ aut_sys }}
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-trust type external
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-trust export export-bgp-trust
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-trust peer-as 65065
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-trust neighbor 100.65.{{ seq }}.1
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-untrust type external
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-untrust export export-bgp-untrust
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-untrust peer-as 65064
+set groups scale-out-srx routing-instances vr-cgn protocols bgp group vmx-01-untrust neighbor 100.64.{{ seq }}.1
+set groups scale-out-srx routing-instances vr-cgn protocols bgp bfd-liveness-detection minimum-interval 500
+set groups scale-out-srx routing-instances vr-cgn protocols bgp bfd-liveness-detection multiplier 5
+set groups scale-out-srx routing-instances vr-cgn interface ge-0/0/0.0
+set groups scale-out-srx routing-instances vr-cgn interface ge-0/0/1.0
+set apply-groups scale-out-srx
+set apply-groups auto-fbf

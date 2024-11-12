@@ -1,0 +1,20 @@
+global result
+
+import warnings
+warnings.filterwarnings("ignore", message="An unknown exception occured")
+
+try:
+    dev.huge_tree = True
+    rpc_output = dev.rpc.request_package_add(
+        reboot=True,
+        no_validate=True,
+        unlink=True,
+        package_name="http://172.30.200.126/junos-install-vsrx3-x86-64-23.4R2.10.tgz",
+        dev_timeout=180,
+    )
+
+except:
+    result = "Upgrade failed"
+
+finally:
+    result = "Upgrade OK, rebooting"

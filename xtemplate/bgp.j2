@@ -1,0 +1,14 @@
+global result
+global header
+
+header = "{:^27} | {:^27}".format("BGP Inet", "BGP Gi")
+
+rpc_output = dev.rpc.get_bgp_summary_information(normalize=True)
+
+peers = [peer.text for peer in rpc_output.findall(".//peer-address")]
+state = [state.text for state in rpc_output.findall(".//peer-state")]
+
+if len(peers) == len(state) == 2:
+    result = f"{peers[0]:>14}:{state[0]:>12} | {peers[1]:>14}:{state[1]:>12}"
+else:
+    result = f"{'Missng BGP configuration':^55}"

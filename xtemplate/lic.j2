@@ -1,0 +1,14 @@
+global result
+
+# clear and install license
+try:
+    rpc_output = dev.rpc.request_license_delete(all=True)
+    rpc_output = dev.rpc.request_license_add(
+        filename="http://10.0.0.1/vsrx-license.txt"
+    )
+
+except:
+    result = "Error loading license"
+
+else:
+    result = "License load OK"

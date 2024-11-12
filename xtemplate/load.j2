@@ -1,0 +1,103 @@
+global result
+global result_adv
+global header
+
+rpc_output = dev.rpc.get_spu_monitoring_information(normalize=True, fpc_slot="0")
+pfe_load = rpc_output.findall(".//spu-cpu-utilization")[0].text
+ip4_sess = rpc_output.findall(".//spu-current-flow-session-ipv4")[0].text
+ip6_sess = rpc_output.findall(".//spu-current-flow-session-ipv6")[0].text
+ip4_cps = rpc_output.findall(".//session-cps-ipv4")[0].text
+ip6_cps = rpc_output.findall(".//session-cps-ipv6")[0].text
+
+rpc_output = dev.rpc.get_interface_information(
+    normalize=True, interface_name="ge-0/0/*"
+)
+in_bps_ge_ints = rpc_output.findall(
+    ".//physical-interface/traffic-statistics/input-bps"
+)
+out_bps_ge_ints = rpc_output.findall(
+    ".//physical-interface/traffic-statistics/output-bps"
+)
+in_pps_ge_ints = rpc_output.findall(
+    ".//physical-interface/traffic-statistics/input-pps"
+)
+out_pps_ge_ints = rpc_output.findall(
+    ".//physical-interface/traffic-statistics/output-pps"
+)
+
+rpc_output = dev.rpc.get_source_nat_rule_sets_information(all=True)
+nat_rules_sess = rpc_output.findall(".//concurrent-hits")
+sum_nat_sess = 0
+for nat_rule_sess in nat_rules_sess:
+    sum_nat_sess += int(nat_rule_sess.text)
+
+sum_in_bps = 0
+sum_out_bps = 0
+sum_in_pps = 0
+sum_out_pps = 0
+
+for in_bps_ge_int in in_bps_ge_ints:
+    sum_in_bps += int(in_bps_ge_int.text)
+
+for out_bps_ge_int in out_bps_ge_ints:
+    sum_out_bps += int(out_bps_ge_int.text)
+
+for in_pps_ge_int in in_pps_ge_ints:
+    sum_in_pps += int(in_pps_ge_int.text)
+
+for out_pps_ge_int in out_pps_ge_ints:
+    sum_out_pps += int(out_pps_ge_int.text)
+
+sum_in_gbps = round((sum_in_bps / 10**9), 2)
+
+sum_out_gbps = round((sum_out_bps / 10**9), 2)
+
+sum_in_mpps = round((sum_in_pps / 10**6), 2)
+
+sum_out_mpps = round((sum_out_pps / 10**6), 2)
+
+result_adv = [
+    [
+        pfe_load,
+        ip4_sess,
+        ip6_sess,
+        sum_nat_sess,
+        ip4_cps,
+        ip6_cps,
+        sum_in_gbps,
+        sum_out_gbps,
+        sum_in_mpps,
+        sum_out_mpps,
+    ]
+]
+
+LOAD_DATA_HEADER = [
+    [
+        "PFE load",
+        "IPv4 sessions",
+        "IPv6 sessions",
+        "NAT sessions",
+        "IPv4 CPS",
+        "IPv6 CPS",
+        "in Gbps",
+        "out Gbps",
+        "in MPPS",
+        "out MPPS",
+    ]
+]
+
+for row in LOAD_DATA_HEADER:
+    header = "{:^8} | {:^13} | {:^13} | {:^12} | {:^10} | {:^10} | {:^8} | {:^8} | {:^8} | {:^8}".format(
+        *row
+    )
+
+for row in result_adv:
+    if row[1] != "N/A":
+        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f}".format(
+            *row
+        )
+
+    else:
+        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8} | {:>8} | {:>8} | {:>8}".format(
+            *row
+        )

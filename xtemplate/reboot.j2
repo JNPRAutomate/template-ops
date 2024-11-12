@@ -1,0 +1,10 @@
+global result
+
+try:
+    rpc_output = dev.rpc.request_reboot()
+
+except:
+    result = "Reboot initiation failed" 
+
+finally:
+    result = "Reboot initiated"

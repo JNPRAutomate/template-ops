@@ -1,0 +1,19 @@
+global result
+global header
+
+ip = "{{ ip }}"
+
+rpc_output = dev.rpc.get_firewall_counter_information(
+    normalize=True, countername=ip, filter="protect-1"
+)
+
+counter = rpc_output.findtext(".//counter-name")
+bytes = rpc_output.findtext(".//byte-count")
+packets = rpc_output.findtext(".//packet-count")
+
+header = "{:^16} | {:^16} | {:^16}".format("Counter", "Bytes", "Packets")
+
+if counter:
+    result = "{:>16} | {:>16} | {:>16}".format(counter, bytes, packets)
+else:
+    result = "{:>16} | {:>16} | {:>16}".format(ip, "N/A", "N/A")

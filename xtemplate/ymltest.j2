@@ -1,0 +1,4 @@
+{% for ip in list1 %}
+set groups scale-out-srx security address-book global address {{ ip }} {{ ip }}
+{% endfor %}
+

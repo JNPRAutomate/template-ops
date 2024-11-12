@@ -1,0 +1,20 @@
+global result
+global header
+
+header = f"{'Action':^30}"
+
+rpc_output = dev.rpc.get_chassis_high_availability_information(normalize=True)
+
+local_role = rpc_output.findall(".//node-role")[0].text
+failover_ready = rpc_output.findall(".//failover-readiness")[0].text
+
+if local_role == "ACTIVE" and failover_ready == "READY":
+    peer_id = rpc_output.findall(".//peer-id")[0].text
+    rpc_output = dev.rpc.request_chassis_ha_failover(
+        services_redundancy_group="1", peer_id=peer_id
+    )
+    result = f"{'Triggering RG1 fail-over':>30}"
+elif local_role == "BACKUP":
+    result = ""
+else:
+    result = f"{'No fail-over ready device':>30}"

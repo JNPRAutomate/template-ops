@@ -1,0 +1,8 @@
+delete groups scale-out-srx-{{ seq_0x }}
+set groups scale-out-srx-{{ seq_0x }} interfaces ge-0/0/{{ trust_int }} unit 0 family inet address 100.65.{{ seq }}.1/24
+set groups scale-out-srx-{{ seq_0x }} interfaces ge-0/0/{{ untrust_int }} unit 0 family inet address 100.64.{{ seq }}.1/24
+set groups scale-out-srx-{{ seq_0x }} routing-instances vr-trust protocols bgp group vsrx-trust neighbor 100.65.{{ seq }}.10 peer-as {{ aut_sys }}
+set groups scale-out-srx-{{ seq_0x }} routing-instances vr-trust interface ge-0/0/{{ trust_int }}.0
+set groups scale-out-srx-{{ seq_0x }} routing-instances vr-untrust protocols bgp group vsrx-untrust neighbor 100.64.{{ seq }}.10 peer-as {{ aut_sys }}
+set groups scale-out-srx-{{ seq_0x }} routing-instances vr-untrust interface ge-0/0/{{ untrust_int }}.0
+set apply-groups scale-out-srx-{{ seq_0x }}

@@ -1,0 +1,47 @@
+global result
+global header
+
+header = "{:^10} | {:^16} | {:^21} | {:^25} | {:^19} | {:^18} | {:^18}".format(
+    "Status",
+    "Failure events",
+    "Sum mon obj weights",
+    "Sum BFD sub-obj weights",
+    "BGP sessions down",
+    "Remote Status",
+    "Remote readiness",
+)
+
+
+rpc_output = dev.rpc.get_chassis_high_availability_detail_information(normalize=True)
+
+local_role = rpc_output.findall(".//node-role")[0].text
+failure_events = rpc_output.findall(".//failure-events")[0].text
+remote_status = rpc_output.findall(".//health-status")[0].text
+failover_ready = rpc_output.findall(".//failover-readiness")[0].text
+obj_weight = sum(
+    [int(item.text) for item in rpc_output.findall(".//ha-srg-obj-weight")]
+)
+bfd_sub_obj_weight = sum(
+    [int(item.text) for item in rpc_output.findall(".//ha-srg-obj-bfdmon-weight")]
+)
+
+rpc_output = dev.rpc.get_bgp_summary_information(normalize=True)
+
+non_established = len(
+    [
+        item.text
+        for item in rpc_output.findall(".//peer-state")
+        if item.text != "Established"
+    ]
+)
+
+
+result = "{:^10} | {:^16} | {:^21} | {:^25} | {:^19} | {:^18} | {:^18}".format(
+    local_role,
+    failure_events,
+    obj_weight,
+    bfd_sub_obj_weight,
+    non_established,
+    remote_status,
+    failover_ready,
+)
