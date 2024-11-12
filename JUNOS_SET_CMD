@@ -1,0 +1,20 @@
+set groups op-template-ops system scripts language python3
+set apply-groups op-template-ops
+
+[ edit groups op-template-ops system scripts op file template-ops.py ]
+
+set command template-ops
+set arguments input description "template seeding data, e.g., sequence number 1-n (or data enclosed in \" \")"
+set arguments template-vars description "pointer to variable gen function in template_ops_vars.py, [vsrx|srx4600|mx|ptx|exec1]"
+set arguments template description "name of j2 template receiving variables from template-vars"
+set arguments push-target description "device name for config template push"
+set arguments profile description "push to multiple SRX devices using profile [profile-name|# from list]"
+set arguments mprofile description "multi-profile execution defined by profile [mprofile-name|# from list]"
+set arguments diff-target description "device name to retrieve diff between candidate and running config"
+set arguments exec-target description "device name for processing template as Python code"
+set arguments list-profile description "list push target profiles from template_ops_conf.py (any argument)"
+set arguments list-mprofile description "list multi-profiles from template_ops_conf.py (any argument)"
+set arguments show-profile description "show details of push target profile [all|profile-name|# from list]"
+set arguments show-mprofile description "show multi-profile details [all|mprofile-name|# from list]"
+set arguments list-template description "list available Jinja2 template files (any argument)"
+set arguments show-template description "show contents of specific template [template-name|# from list ]"
