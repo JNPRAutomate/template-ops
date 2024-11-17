@@ -1,5 +1,5 @@
 # template-ops
-template-ops is a Python script folding minimalistic framework built atop of PyEZ for human interaction with Junos devices in terms of configuration and execution of RPCs (actions, data retrieval). Running both Linux off-box and Junos/Junos-EVO on-box. Initially designed for operations in custom [MX/PTX/SRX scale-out architectures](https://community.juniper.net/blogs/karel-hendrych/2024/02/22/mx-srx-scale-out-system-bulk-junos-config-changes "MX/PTX/SRX scale-out architectures"), but totally generic meanwhile. Licensed under Apache 2.0 license. 
+template-ops is a Python script that serves as a minimalistic framework built atop PyEZ for human interaction with Junos devices in terms of configuration and execution of RPCs (actions and data retrieval). It can run both off-box on Linux and on-box on Junos/Junos-EVO. Initially designed for operations in custom [MX/PTX/SRX scale-out architectures](https://community.juniper.net/blogs/karel-hendrych/2024/02/22/mx-srx-scale-out-system-bulk-junos-config-changes "MX/PTX/SRX scale-out architectures"), but totally generic meanwhile. Licensed under Apache 2.0 license. 
 
 Details are contained in the [PDF manual](https://github.com/JNPRAutomate/template-ops/blob/main/template-ops_man_v1.pdf).
 
