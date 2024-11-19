@@ -1,8 +1,6 @@
 set groups op-template-ops system scripts language python3
 set apply-groups op-template-ops
-
-[ edit groups op-template-ops system scripts op file template-ops.py ]
-
+edit groups op-template-ops system scripts op file template-ops.py
 set command template-ops
 set arguments input description "template seeding data, e.g., sequence number 1-n (or data enclosed in \" \")"
 set arguments template-vars description "pointer to variable gen function in template_ops_vars.py, [vsrx|srx4600|mx|ptx|exec1]"
@@ -18,3 +16,4 @@ set arguments show-profile description "show details of push target profile [all
 set arguments show-mprofile description "show multi-profile details [all|mprofile-name|# from list]"
 set arguments list-template description "list available Jinja2 template files (any argument)"
 set arguments show-template description "show contents of specific template [template-name|# from list ]"
+top
