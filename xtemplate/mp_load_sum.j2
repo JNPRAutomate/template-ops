@@ -13,7 +13,8 @@ global header
     sum_sum_in_mpps,
     sum_sum_out_mpps,
     sum_sum_nat_sess,
-) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    sum_sof_npchache,
+) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 for data in template_thread_data:
     if len(data) > 2:
@@ -28,6 +29,8 @@ for data in template_thread_data:
         sum_sum_out_gbps += float(kpi[7])
         sum_sum_in_mpps += float(kpi[8])
         sum_sum_out_mpps += float(kpi[9])
+        if kpi[10] != "N/A":
+            sum_sof_npchache += float(kpi[10])
 
 load_data_sum = [
     [
@@ -42,6 +45,7 @@ load_data_sum = [
         sum_sum_out_gbps,
         sum_sum_in_mpps,
         sum_sum_out_mpps,
+        "N/A",
         "N/A",
     ]
 ]
@@ -65,6 +69,7 @@ if nna_data_count > 1:
     avg_sum_out_gbps = round(sum_sum_out_gbps / nna_data_count, 2)
     avg_sum_in_mpps = round(sum_sum_in_mpps / nna_data_count, 2)
     avg_sum_out_mpps = round(sum_sum_out_mpps / nna_data_count, 2)
+    avg_sum_sof_npchache = round(sum_sof_npchache / nna_data_count, 2)
 
     load_data_avg = [
         [
@@ -79,24 +84,25 @@ if nna_data_count > 1:
             avg_sum_out_gbps,
             avg_sum_in_mpps,
             avg_sum_out_mpps,
+            avg_sum_sof_npchache,
         ]
     ]
 
     for data in load_data_avg:
         print(
-            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} |".format(
+            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>10.1f} |".format(
                 *data
             )
         )
 
     for data in load_data_sum:
         print(
-            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} |".format(
+            "| {:^12} | {:>8} | {:>13,} | {:>13,} | {:>12,} | {:>10,} | {:>10,} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>10} |".format(
                 *data
             )
         )
 
-    print("-" * 144)
+    print("-" * 157)
 
 
 header = None

@@ -8,9 +8,13 @@ ip4_sess = rpc_output.findall(".//spu-current-flow-session-ipv4")[0].text
 ip6_sess = rpc_output.findall(".//spu-current-flow-session-ipv6")[0].text
 ip4_cps = rpc_output.findall(".//session-cps-ipv4")[0].text
 ip6_cps = rpc_output.findall(".//session-cps-ipv6")[0].text
-
+try:
+  rpc_output = dev.rpc.get_ioc_np_cache_stats(normalize=True)
+  sof_npchache = rpc_output.findall(".//ioc-np-cache-session-usage-percentage-pfe-0")[0].text
+except:
+  sof_npchache = "N/A"
 rpc_output = dev.rpc.get_interface_information(
-    normalize=True, interface_name="ge-0/0/*"
+    normalize=True, interface_name="*"
 )
 in_bps_ge_ints = rpc_output.findall(
     ".//physical-interface/traffic-statistics/input-bps"
@@ -68,6 +72,7 @@ result_adv = [
         sum_out_gbps,
         sum_in_mpps,
         sum_out_mpps,
+        sof_npchache,
     ]
 ]
 
@@ -83,21 +88,22 @@ LOAD_DATA_HEADER = [
         "out Gbps",
         "in MPPS",
         "out MPPS",
+        "np-cache %",
     ]
 ]
 
 for row in LOAD_DATA_HEADER:
-    header = "{:^8} | {:^13} | {:^13} | {:^12} | {:^10} | {:^10} | {:^8} | {:^8} | {:^8} | {:^8}".format(
+    header = "{:^8} | {:^13} | {:^13} | {:^12} | {:^10} | {:^10} | {:^8} | {:^8} | {:^8} | {:^8} | {:^8}".format(
         *row
     )
 
 for row in result_adv:
     if row[1] != "N/A":
-        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f}".format(
+        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>10}".format(
             *row
         )
 
     else:
-        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8} | {:>8} | {:>8} | {:>8}".format(
+        result = "{:>8} | {:>13} | {:>13} | {:>12} | {:>10} | {:>10} | {:>8} | {:>8} | {:>8} | {:>8} | {:>10}".format(
             *row
         )
