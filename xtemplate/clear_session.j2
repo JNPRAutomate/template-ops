@@ -1,0 +1,18 @@
+"""
+session clearing template
+
+template_vars:
+"rpc_param": str(_input).replace(" ",", ").replace("-","_")
+
+input-style (configure default in profile similar to below and override when needed):
+./template-ops.py --profile clear_session  --input 'destination-port="1024" source-prefix="10/8"'
+
+"""
+
+global result
+
+rpc_output = dev.rpc.clear_flow_session(
+    {{ rpc_param }} 
+)
+
+result = 'session clearing started: {{ rpc_param }}'
