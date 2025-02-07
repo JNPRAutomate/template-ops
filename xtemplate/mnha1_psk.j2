@@ -1,0 +1,231 @@
+delete groups mnha
+delete groups secgw
+
+set groups mnha security ike proposal ike-prop-icl authentication-method pre-shared-keys
+set groups mnha security ike proposal ike-prop-icl dh-group group20
+set groups mnha security ike proposal ike-prop-icl encryption-algorithm aes-256-gcm
+set groups mnha security ike proposal ike-prop-icl lifetime-seconds 28800
+set groups mnha security ike policy ike-pol-icl proposals ike-prop-icl
+set groups mnha security ike policy ike-pol-icl pre-shared-key ascii-text "$9$EUNcSeWLNbwgSrxdb2oan/Ctu1lK8NVY"
+set groups mnha security ike gateway icl ike-policy ike-pol-icl
+set groups mnha security ike gateway icl version v2-only
+set groups mnha security ipsec proposal ipsec-prop-icl encryption-algorithm aes-256-gcm
+set groups mnha security ipsec proposal ipsec-prop-icl lifetime-seconds 3600
+set groups mnha security ipsec policy ipsec-policy-icl perfect-forward-secrecy keys group20
+set groups mnha security ipsec policy ipsec-policy-icl proposals ipsec-prop-icl
+set groups mnha security ipsec vpn icl ha-link-encryption
+set groups mnha security ipsec vpn icl ike gateway icl
+set groups mnha security ipsec vpn icl ike ipsec-policy ipsec-policy-icl
+
+
+set groups mnha security policies from-zone icl to-zone icl policy permit match source-address any
+set groups mnha security policies from-zone icl to-zone icl policy permit match destination-address any
+set groups mnha security policies from-zone icl to-zone icl policy permit match application any
+set groups mnha security policies from-zone icl to-zone icl policy permit then permit
+
+
+set groups mnha security zones security-zone ran interfaces lo0.0 host-inbound-traffic system-services ike
+set groups mnha security zones security-zone ran interfaces lo0.0 host-inbound-traffic system-services ping
+set groups mnha security zones security-zone ran interfaces ge-0/0/0.{{ ran_vlan }} host-inbound-traffic system-services ping
+set groups mnha security zones security-zone ran interfaces ge-0/0/0.{{ ran_vlan }} host-inbound-traffic protocols bgp
+set groups mnha security zones security-zone ran interfaces ge-0/0/0.{{ ran_vlan }} host-inbound-traffic protocols bfd
+
+set groups mnha security zones security-zone core interfaces ge-0/0/1.{{ core_vlan }} host-inbound-traffic system-services ping
+set groups mnha security zones security-zone core interfaces ge-0/0/1.{{ core_vlan }} host-inbound-traffic protocols bgp
+set groups mnha security zones security-zone core interfaces ge-0/0/1.{{ core_vlan }} host-inbound-traffic protocols bfd
+
+set groups mnha security zones security-zone icl interfaces ge-0/0/0.1100 host-inbound-traffic system-services ping
+set groups mnha security zones security-zone icl interfaces ge-0/0/0.1100 host-inbound-traffic protocols bgp
+set groups mnha security zones security-zone icl interfaces ge-0/0/0.1100 host-inbound-traffic protocols bfd
+
+set groups mnha security zones security-zone icl interfaces ge-0/0/1.1101 host-inbound-traffic system-services ping
+set groups mnha security zones security-zone icl interfaces ge-0/0/1.1101 host-inbound-traffic protocols bgp
+set groups mnha security zones security-zone icl interfaces ge-0/0/1.1101 host-inbound-traffic protocols bfd
+
+set groups mnha security zones security-zone icl interfaces lo0.1 host-inbound-traffic system-services ping
+set groups mnha security zones security-zone icl interfaces lo0.1 host-inbound-traffic system-services ike
+set groups mnha security zones security-zone icl interfaces lo0.1 host-inbound-traffic system-services high-availability
+set groups mnha security zones security-zone icl interfaces lo0.1 host-inbound-traffic system-services ssh
+set groups mnha security zones security-zone icl interfaces lo0.1 host-inbound-traffic protocols bfd
+
+set groups mnha interfaces ge-0/0/0 vlan-tagging
+set groups mnha interfaces ge-0/0/0 unit {{ ran_vlan }} description "ran          100.65.{{ seq_m1 }}.{{ int_ip }}/24"
+set groups mnha interfaces ge-0/0/0 unit {{ ran_vlan }} vlan-id {{ ran_vlan }}
+set groups mnha interfaces ge-0/0/0 unit {{ ran_vlan }} family inet address 100.65.{{ seq_m1 }}.{{ int_ip }}/24
+set groups mnha interfaces ge-0/0/0 unit 1100 description "ICL-ran      100.69.0.{{ icl_int_ip }}/24"
+set groups mnha interfaces ge-0/0/0 unit 1100 vlan-id 1100
+set groups mnha interfaces ge-0/0/0 unit 1100 family inet address 100.69.0.{{ icl_int_ip }}/24
+
+set groups mnha interfaces ge-0/0/1 vlan-tagging
+set groups mnha interfaces ge-0/0/1 unit {{ core_vlan }} description "core         100.64.{{ seq_m1 }}.{{ int_ip }}/24"
+set groups mnha interfaces ge-0/0/1 unit {{ core_vlan }} vlan-id {{ core_vlan }}
+set groups mnha interfaces ge-0/0/1 unit {{ core_vlan }} family inet address 100.64.{{ seq_m1 }}.{{ int_ip }}/24
+set groups mnha interfaces ge-0/0/1 unit 1101 description "ICL-core     100.68.0.{{ icl_int_ip }}/24"
+set groups mnha interfaces ge-0/0/1 unit 1101 vlan-id 1101
+set groups mnha interfaces ge-0/0/1 unit 1101 family inet address 100.68.0.{{ icl_int_ip }}/24
+
+set groups mnha interfaces lo0 unit 0 description "MN-HA+IPSEC  100.66.{{ seq_m1 }}.1"
+set groups mnha interfaces lo0 unit 0 family inet address 100.66.{{ seq_m1 }}.1/32
+set groups mnha interfaces lo0 unit 0 family inet address 1.1.1.1
+set groups mnha interfaces lo0 unit 1 description "ICL          100.67.0.{{ node }}"
+set groups mnha interfaces lo0 unit 1 family inet address 100.67.0.{{ node }}/32
+
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.65.{{ seq_m1 }}.1 src-ip 100.65.{{ seq_m1 }}.{{ int_ip }}
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.65.{{ seq_m1 }}.1 routing-instance vr-1   
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.65.{{ seq_m1 }}.1 session-type singlehop 
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.65.{{ seq_m1 }}.1 interface ge-0/0/0.{{ ran_vlan }}
+                                                                                                                              
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.64.{{ seq_m1 }}.1 src-ip 100.64.{{ seq_m1 }}.{{ int_ip }}
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.64.{{ seq_m1 }}.1 routing-instance vr-1   
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.64.{{ seq_m1 }}.1 session-type singlehop 
+set groups mnha chassis high-availability services-redundancy-group 1 monitor bfd-liveliness 100.64.{{ seq_m1 }}.1 interface ge-0/0/1.{{ core_vlan }}
+
+set groups mnha chassis high-availability local-id {{ node }}
+set groups mnha chassis high-availability local-id local-ip 100.67.0.{{ node }}
+set groups mnha chassis high-availability peer-id {{ other_node }} peer-ip 100.67.0.{{ other_node }}
+set groups mnha chassis high-availability peer-id {{ other_node }} interface lo0.1
+set groups mnha chassis high-availability peer-id {{ other_node }} routing-instance icl
+set groups mnha chassis high-availability peer-id {{ other_node }} vpn-profile icl
+set groups mnha chassis high-availability peer-id {{ other_node }} liveness-detection minimum-interval {{ core_vlan }}
+set groups mnha chassis high-availability peer-id {{ other_node }} liveness-detection multiplier 3
+set groups mnha chassis high-availability services-redundancy-group 0 peer-id {{ other_node }}
+set groups mnha chassis high-availability services-redundancy-group 1 deployment-type routing
+set groups mnha chassis high-availability services-redundancy-group 1 peer-id {{ other_node }}
+set groups mnha chassis high-availability services-redundancy-group 1 activeness-probe dest-ip 100.66.0.0
+set groups mnha chassis high-availability services-redundancy-group 1 activeness-probe dest-ip src-ip 100.66.{{ seq_m1 }}.1
+set groups mnha chassis high-availability services-redundancy-group 1 activeness-probe dest-ip routing-instance vr-1
+set groups mnha chassis high-availability services-redundancy-group 1 active-signal-route 100.64.0.1
+set groups mnha chassis high-availability services-redundancy-group 1 backup-signal-route 100.64.0.0
+set groups mnha chassis high-availability services-redundancy-group 1 prefix-list srg1-prefix routing-instance vr-1
+set groups mnha chassis high-availability services-redundancy-group 1 managed-services ipsec
+set groups mnha chassis high-availability services-redundancy-group 1 process-packet-on-backup
+set groups mnha chassis high-availability services-redundancy-group 1 activeness-priority {{ act_prio }}
+
+set groups mnha policy-options prefix-list srg1-prefix_export 100.66.{{ seq_m1 }}.1/32
+set groups mnha policy-options prefix-list srg1-prefix 100.66.{{ seq_m1 }}.1/32
+set groups mnha policy-options prefix-list srg1-prefix 1.1.1.1
+
+set groups mnha policy-options policy-statement export-icl-to-ran term 10 from interface lo0.1
+set groups mnha policy-options policy-statement export-icl-to-ran term 10 then as-path-prepend {{ icl_aut_sys }}
+set groups mnha policy-options policy-statement export-icl-to-ran term 10 then accept
+set groups mnha policy-options policy-statement export-icl-to-ran term 100 then reject
+set groups mnha policy-options policy-statement export-icl-to-core term 10 from interface lo0.1
+set groups mnha policy-options policy-statement export-icl-to-core term 10 then accept
+set groups mnha policy-options policy-statement export-icl-to-core term 100 then reject
+set groups mnha policy-options policy-statement export-to-core term 10 from interface st0.0
+set groups mnha policy-options policy-statement export-to-core term 10 from condition srg1_backup
+set groups mnha policy-options policy-statement export-to-core term 10 then as-path-prepend {{ aut_sys }}
+set groups mnha policy-options policy-statement export-to-core term 10 then accept
+set groups mnha policy-options policy-statement export-to-core term 20 from interface st0.0
+set groups mnha policy-options policy-statement export-to-core term 20 from condition srg1_active
+set groups mnha policy-options policy-statement export-to-core term 20 then accept
+set groups mnha policy-options policy-statement export-to-core term 90 from interface st0.0
+set groups mnha policy-options policy-statement export-to-core term 90 then as-path-prepend "{{ fallback_aut_sys }}"
+set groups mnha policy-options policy-statement export-to-core term 90 then accept
+set groups mnha policy-options policy-statement export-to-core term 100 then reject
+set groups mnha policy-options policy-statement export-to-ran term 10 from prefix-list srg1-prefix_export
+set groups mnha policy-options policy-statement export-to-ran term 10 from condition srg1_backup
+set groups mnha policy-options policy-statement export-to-ran term 10 then as-path-prepend {{ aut_sys }}
+set groups mnha policy-options policy-statement export-to-ran term 10 then accept
+set groups mnha policy-options policy-statement export-to-ran term 20 from prefix-list srg1-prefix_export
+set groups mnha policy-options policy-statement export-to-ran term 20 from condition srg1_active
+set groups mnha policy-options policy-statement export-to-ran term 20 then accept
+set groups mnha policy-options policy-statement export-to-ran term 90 from prefix-list srg1-prefix_export
+set groups mnha policy-options policy-statement export-to-ran term 90 then as-path-prepend "{{ fallback_aut_sys }}"
+set groups mnha policy-options policy-statement export-to-ran term 90 then accept
+set groups mnha policy-options policy-statement export-to-ran term 100 then reject
+set groups mnha policy-options condition srg1_active if-route-exists 100.64.0.1/32
+set groups mnha policy-options condition srg1_active if-route-exists table inet.0
+set groups mnha policy-options condition srg1_backup if-route-exists 100.64.0.0/32
+set groups mnha policy-options condition srg1_backup if-route-exists table inet.0
+
+set groups mnha routing-instances icl instance-type virtual-router
+set groups mnha routing-instances icl protocols bgp group icl-core neighbor 100.68.0.{{ other_icl_int_ip }} export export-icl-to-ran
+set groups mnha routing-instances icl protocols bgp group icl-core neighbor 100.68.0.{{ other_icl_int_ip }} peer-as {{ other_icl_aut_sys }}
+set groups mnha routing-instances icl protocols bgp group icl-core bfd-liveness-detection minimum-interval 500
+set groups mnha routing-instances icl protocols bgp group icl-core bfd-liveness-detection multiplier 3 
+set groups mnha routing-instances icl protocols bgp group icl-ran neighbor 100.69.0.{{ other_icl_int_ip }} export export-icl-to-core
+set groups mnha routing-instances icl protocols bgp group icl-ran neighbor 100.69.0.{{ other_icl_int_ip }} peer-as {{ other_icl_aut_sys }}
+set groups mnha routing-instances icl protocols bgp group icl-ran bfd-liveness-detection minimum-interval 500
+set groups mnha routing-instances icl protocols bgp group icl-ran bfd-liveness-detection multiplier 3 
+set groups mnha routing-instances icl protocols bgp local-as {{ icl_aut_sys }}
+set groups mnha routing-instances icl interface ge-0/0/0.1100
+set groups mnha routing-instances icl interface ge-0/0/1.1101
+set groups mnha routing-instances icl interface lo0.1
+
+set groups mnha routing-instances vr-1 instance-type virtual-router
+set groups mnha routing-instances vr-1 protocols bgp group ran neighbor 100.65.{{ seq_m1 }}.1 export export-to-ran
+set groups mnha routing-instances vr-1 protocols bgp group ran neighbor 100.65.{{ seq_m1 }}.1 peer-as 65002
+set groups mnha routing-instances vr-1 protocols bgp group core neighbor 100.64.{{ seq_m1 }}.1 export export-to-core
+set groups mnha routing-instances vr-1 protocols bgp group core neighbor 100.64.{{ seq_m1 }}.1 peer-as 65003
+set groups mnha routing-instances vr-1 protocols bgp local-as {{ aut_sys }}
+set groups mnha routing-instances vr-1 protocols bgp bfd-liveness-detection minimum-interval 500
+set groups mnha routing-instances vr-1 protocols bgp bfd-liveness-detection multiplier 5
+set groups mnha routing-instances vr-1 interface ge-0/0/0.{{ ran_vlan }}
+set groups mnha routing-instances vr-1 interface ge-0/0/1.{{ core_vlan }}
+set groups mnha routing-instances vr-1 interface lo0.0
+
+set groups mnha security alg h323 disable
+set groups mnha security alg mgcp disable
+set groups mnha security alg msrpc disable
+set groups mnha security alg sunrpc disable
+set groups mnha security alg rtsp disable
+set groups mnha security alg sccp disable
+set groups mnha security alg sip disable
+set groups mnha security alg talk disable
+set groups mnha security alg tftp disable
+set groups mnha security alg pptp disable
+set groups mnha security alg ftp disable
+set groups mnha security alg dns disable
+
+set groups secgw security pki ca-profile SecGW-CA01 ca-identity SecGW-CA01
+set groups secgw security pki ca-profile SecGW-CA01 revocation-check disable
+set groups secgw security distribution-profile fat-core
+set groups secgw security ike proposal ike-prop-2 authentication-method pre-shared-keys
+set groups secgw security ike proposal ike-prop-2 dh-group group20
+set groups secgw security ike proposal ike-prop-2 encryption-algorithm aes-256-gcm
+set groups secgw security ike proposal ike-prop-2 lifetime-seconds 28800
+set groups secgw security ike policy ike-pol-2 proposals ike-prop-2
+set groups secgw security ike policy ike-pol-2 seeded-pre-shared-key ascii-text "$9$lVGv8xbs4Di.Ndi.P56/lKM8NdwYgJUj"
+set groups secgw security ike gateway gw-2 ike-policy ike-pol-2
+set groups secgw security ike gateway gw-2 dynamic hostname autovpn-01.domain
+set groups secgw security ike gateway gw-2 dynamic ike-user-type group-ike-id
+set groups secgw security ike gateway gw-2 dead-peer-detection optimized
+set groups secgw security ike gateway gw-2 dead-peer-detection interval 2
+set groups secgw security ike gateway gw-2 dead-peer-detection threshold 4
+set groups secgw security ike gateway gw-2 local-identity hostname secgw-01.autovpn-01.domain
+set groups secgw security ike gateway gw-2 external-interface lo0.0
+set groups secgw security ike gateway gw-2 local-address 1.1.1.1
+set groups secgw security ike gateway gw-2 version v2-only
+set groups secgw security ipsec proposal ipsec-prop-1 encryption-algorithm aes-256-gcm
+set groups secgw security ipsec proposal ipsec-prop-1 lifetime-seconds 3600
+set groups secgw security ipsec policy ipsec-pol-1 perfect-forward-secrecy keys group20
+set groups secgw security ipsec policy ipsec-pol-1 proposals ipsec-prop-1
+set groups secgw security ipsec vpn vpn-2 bind-interface st0.0
+set groups secgw security ipsec vpn vpn-2 ike gateway gw-2
+set groups secgw security ipsec vpn vpn-2 ike ipsec-policy ipsec-pol-1
+set groups secgw security ipsec vpn vpn-2 traffic-selector ts-1 local-ip 0.0.0.0/0
+set groups secgw security ipsec vpn vpn-2 traffic-selector ts-1 remote-ip 0.0.0.0/0
+set groups secgw security policies from-zone ran to-zone ran policy ctrl match source-address any
+set groups secgw security policies from-zone ran to-zone ran policy ctrl match destination-address any
+set groups secgw security policies from-zone ran to-zone ran policy ctrl match application junos-icmp-ping
+set groups secgw security policies from-zone ran to-zone ran policy ctrl match application junos-ike
+set groups secgw security policies from-zone ran to-zone ran policy ctrl then permit
+set groups secgw security policies from-zone vpn to-zone core policy vpn-1 match source-address any
+set groups secgw security policies from-zone vpn to-zone core policy vpn-1 match destination-address any
+set groups secgw security policies from-zone vpn to-zone core policy vpn-1 match application any
+set groups secgw security policies from-zone vpn to-zone core policy vpn-1 then permit
+set groups secgw security policies from-zone core to-zone vpn policy vpn-1 match source-address any
+set groups secgw security policies from-zone core to-zone vpn policy vpn-1 match destination-address any
+set groups secgw security policies from-zone core to-zone vpn policy vpn-1 match application any
+set groups secgw security policies from-zone core to-zone vpn policy vpn-1 then permit
+set groups secgw security policies global policy drop match source-address any
+set groups secgw security policies global policy drop match destination-address any
+set groups secgw security policies global policy drop match application any
+set groups secgw security policies global policy drop then deny
+set groups secgw security zones security-zone vpn interfaces st0.0
+set groups secgw interfaces st0 unit 0 family inet
+set groups secgw routing-instances vr-1 interface st0.0
+
+set apply-groups mnha
+set apply-groups secgw

@@ -1,0 +1,12 @@
+global result
+
+try:
+    rpc_output = dev.rpc.clear_pki_local_certificate(all=True)
+    rpc_output = dev.rpc.clear_pki_key_pair(all=True)
+    rpc_output = dev.rpc.clear_pki_ca_certificate(all=True)
+
+except:
+    result = "Error clearing local cert, key-pairs and CA certs"
+
+else:
+    result = "Clearing local certs, key-pairs and CA certs done"

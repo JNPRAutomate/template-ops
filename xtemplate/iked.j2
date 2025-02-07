@@ -1,0 +1,13 @@
+global result
+
+try:
+    rpc_output = dev.rpc.request_package_add(
+        package_name="optional://junos-ike.tgz",
+        dev_timeout=120,
+    )
+
+except:
+    result = "IKED install failed"
+
+else:
+    result = "IKED installed OK"
